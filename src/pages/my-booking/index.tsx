@@ -94,7 +94,6 @@ const MyBookingPage: React.FC = () => {
         Taro.showToast({ title: '取消成功', icon: 'success' })
         setShowCancelModal(false)
         setSelectedBookingId(null)
-        refreshBookings()
       } else {
         Taro.showToast({ title: '取消失败，请重试', icon: 'none' })
       }

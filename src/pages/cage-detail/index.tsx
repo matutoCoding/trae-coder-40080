@@ -23,11 +23,10 @@ const CageDetailPage: React.FC = () => {
   const [endTime, setEndTime] = useState('12:00')
 
   useDidShow(() => {
-    // 页面显示时刷新数据
-    const refreshBookings = useBookingStore.getState().refreshBookings
-    if (refreshBookings) {
-      refreshBookings()
-    }
+    // 页面显示时重置选择为今天，确保状态最新
+    setSelectedDate(dayjs().format('YYYY-MM-DD'))
+    setStartDate(dayjs().format('YYYY-MM-DD'))
+    setEndDate(dayjs().format('YYYY-MM-DD'))
   })
 
   const cage = useMemo(() => {
@@ -83,7 +82,12 @@ const CageDetailPage: React.FC = () => {
 
   const handleBookNow = () => {
     try {
-      if (!cage || cage.status !== 'available') {
+      if (!cage) {
+        Taro.showToast({ title: '笼位信息不存在', icon: 'none' })
+        return
+      }
+
+      if (cage.status === 'maintenance' || cage.status === 'cleaning') {
         Taro.showToast({ title: '该笼位当前不可预约', icon: 'none' })
         return
       }
@@ -279,12 +283,12 @@ const CageDetailPage: React.FC = () => {
         <View
           className={classnames(
             styles.bookButton,
-            (hasConflict || cage.status !== 'available') && styles.disabled
+            (hasConflict || cage.status === 'maintenance' || cage.status === 'cleaning') && styles.disabled
           )}
           onClick={handleBookNow}
         >
           <Text className={styles.bookText}>
-            {hasConflict ? '时段冲突' : cage.status !== 'available' ? '不可预约' : '立即预约'}
+            {hasConflict ? '时段冲突' : cage.status === 'maintenance' || cage.status === 'cleaning' ? '不可预约' : '立即预约'}
           </Text>
         </View>
       </View>
