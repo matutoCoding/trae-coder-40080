@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { View, Text } from '@tarojs/components'
 import classnames from 'classnames'
 import dayjs from 'dayjs'
-import { getActiveBookingsByCageId } from '@/data/bookingData'
+import { useBookingStore } from '@/store/useBookingStore'
 import styles from './index.module.scss'
 
 interface CalendarViewProps {
@@ -11,56 +11,68 @@ interface CalendarViewProps {
   onDateSelect: (date: string) => void
 }
 
-const getBookedSlotsForDate = (cageId: string, date: string) => {
-  const bookings = getActiveBookingsByCageId(cageId)
-  const dayBookings = bookings.filter(
-    b => date >= b.startDate && date <= b.endDate
-  )
-  return dayBookings.length > 0
-}
-
 const CalendarView: React.FC<CalendarViewProps> = ({ cageId, selectedDate, onDateSelect }) => {
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM'))
+  const bookings = useBookingStore(state => state.bookings)
   
   const calendarDays = useMemo(() => {
-    const startOfMonth = dayjs(currentMonth).startOf('month')
-    const endOfMonth = dayjs(currentMonth).endOf('month')
-    const startDay = startOfMonth.day()
-    const daysInMonth = endOfMonth.date()
-    
-    const days: { date: string; isCurrentMonth: boolean; day: number }[] = []
-    
-    const prevMonth = startOfMonth.subtract(1, 'month')
-    const prevMonthDays = prevMonth.daysInMonth()
-    for (let i = startDay - 1; i >= 0; i--) {
-      const d = prevMonthDays - i
-      days.push({
-        date: prevMonth.date(d).format('YYYY-MM-DD'),
-        isCurrentMonth: false,
-        day: d
-      })
+    try {
+      const startOfMonth = dayjs(currentMonth).startOf('month')
+      const endOfMonth = dayjs(currentMonth).endOf('month')
+      const startDay = startOfMonth.day()
+      const daysInMonth = endOfMonth.date()
+      
+      const days: { date: string; isCurrentMonth: boolean; day: number }[] = []
+      
+      const prevMonth = startOfMonth.subtract(1, 'month')
+      const prevMonthDays = prevMonth.daysInMonth()
+      for (let i = startDay - 1; i >= 0; i--) {
+        const d = prevMonthDays - i
+        days.push({
+          date: prevMonth.date(d).format('YYYY-MM-DD'),
+          isCurrentMonth: false,
+          day: d
+        })
+      }
+      
+      for (let d = 1; d <= daysInMonth; d++) {
+        days.push({
+          date: startOfMonth.date(d).format('YYYY-MM-DD'),
+          isCurrentMonth: true,
+          day: d
+        })
+      }
+      
+      const remaining = 42 - days.length
+      const nextMonth = endOfMonth.add(1, 'month')
+      for (let d = 1; d <= remaining; d++) {
+        days.push({
+          date: nextMonth.date(d).format('YYYY-MM-DD'),
+          isCurrentMonth: false,
+          day: d
+        })
+      }
+      
+      return days
+    } catch (error) {
+      console.error('[CalendarView] 生成日历数据出错:', error)
+      return []
     }
-    
-    for (let d = 1; d <= daysInMonth; d++) {
-      days.push({
-        date: startOfMonth.date(d).format('YYYY-MM-DD'),
-        isCurrentMonth: true,
-        day: d
-      })
-    }
-    
-    const remaining = 42 - days.length
-    const nextMonth = endOfMonth.add(1, 'month')
-    for (let d = 1; d <= remaining; d++) {
-      days.push({
-        date: nextMonth.date(d).format('YYYY-MM-DD'),
-        isCurrentMonth: false,
-        day: d
-      })
-    }
-    
-    return days
   }, [currentMonth])
+
+  const getBookedSlotsForDate = (date: string): boolean => {
+    try {
+      const dayBookings = bookings.filter(
+        b => b.cageId === cageId && 
+        (b.status === 'confirmed' || b.status === 'pending') &&
+        date >= b.startDate && date <= b.endDate
+      )
+      return dayBookings.length > 0
+    } catch (error) {
+      console.error('[CalendarView] 获取日期预约状态出错:', error)
+      return false
+    }
+  }
 
   const weekdays = ['日', '一', '二', '三', '四', '五', '六']
   const today = dayjs().format('YYYY-MM-DD')
@@ -71,6 +83,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({ cageId, selectedDate, onDat
 
   const nextMonth = () => {
     setCurrentMonth(dayjs(currentMonth).add(1, 'month').format('YYYY-MM'))
+  }
+
+  const handleDateSelect = (date: string, isPast: boolean) => {
+    if (isPast) return
+    try {
+      onDateSelect(date)
+    } catch (error) {
+      console.error('[CalendarView] 选择日期出错:', error)
+    }
   }
 
   return (
@@ -98,7 +119,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ cageId, selectedDate, onDat
 
       <View className={styles.daysGrid}>
         {calendarDays.map((item, index) => {
-          const hasBooking = getBookedSlotsForDate(cageId, item.date)
+          const hasBooking = getBookedSlotsForDate(item.date)
           const isToday = item.date === today
           const isSelected = item.date === selectedDate
           const isPast = dayjs(item.date).isBefore(dayjs(), 'day')
@@ -114,7 +135,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ cageId, selectedDate, onDat
                 isPast && styles.past,
                 hasBooking && styles.hasBooking
               )}
-              onClick={() => !isPast && onDateSelect(item.date)}
+              onClick={() => handleDateSelect(item.date, isPast)}
             >
               <Text className={styles.dayText}>{item.day}</Text>
               {hasBooking && item.isCurrentMonth && (

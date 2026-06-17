@@ -17,14 +17,13 @@ const statusTabs: { value: BookingStatus | 'all'; label: string }[] = [
 ]
 
 const MyBookingPage: React.FC = () => {
-  const {
-    getFilteredBookings,
-    filterStatus,
-    setFilterStatus,
-    cancelBooking,
-    refreshBookings,
-    setSelectedBooking
-  } = useBookingStore()
+  const bookings = useBookingStore(state => state.bookings)
+  const filterStatus = useBookingStore(state => state.filterStatus)
+  const setFilterStatus = useBookingStore(state => state.setFilterStatus)
+  const cancelBooking = useBookingStore(state => state.cancelBooking)
+  const refreshBookings = useBookingStore(state => state.refreshBookings)
+  const setSelectedBooking = useBookingStore(state => state.setSelectedBooking)
+  const currentResearcher = useBookingStore(state => state.currentResearcher)
 
   const [refreshing, setRefreshing] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
@@ -40,7 +39,23 @@ const MyBookingPage: React.FC = () => {
     }, 1000)
   })
 
-  const bookings = useMemo(() => getFilteredBookings(), [filterStatus, refreshing])
+  const filteredBookings = useMemo(() => {
+    try {
+      let result = [...bookings]
+      if (filterStatus !== 'all') {
+        result = result.filter(b => b.status === filterStatus)
+      }
+      if (currentResearcher) {
+        result = result.filter(b => b.researcher === currentResearcher)
+      }
+      return result.sort((a, b) => 
+        new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
+      )
+    } catch (error) {
+      console.error('[MyBooking] 过滤预约列表出错:', error)
+      return []
+    }
+  }, [bookings, filterStatus, currentResearcher, refreshing])
 
   const statusText = (status: string): string => {
     const map: Record<string, string> = {
@@ -97,14 +112,14 @@ const MyBookingPage: React.FC = () => {
   }
 
   const stats = useMemo(() => {
-    const all = bookings.length
-    const pending = bookings.filter(b => b.status === 'pending').length
-    const confirmed = bookings.filter(b => b.status === 'confirmed').length
-    const today = bookings.filter(b =>
+    const all = filteredBookings.length
+    const pending = filteredBookings.filter(b => b.status === 'pending').length
+    const confirmed = filteredBookings.filter(b => b.status === 'confirmed').length
+    const today = filteredBookings.filter(b =>
       b.status !== 'cancelled' && dayjs(b.startDate).isSame(dayjs(), 'day')
     ).length
     return { all, pending, confirmed, today }
-  }, [bookings])
+  }, [filteredBookings])
 
   return (
     <ScrollView className={styles.pageContainer} scrollY>
@@ -143,8 +158,8 @@ const MyBookingPage: React.FC = () => {
       </ScrollView>
 
       <View className={styles.bookingList}>
-        {bookings.length > 0 ? (
-          bookings.map(booking => (
+        {filteredBookings.length > 0 ? (
+          filteredBookings.map(booking => (
             <View key={booking.id} className={styles.bookingCard}>
               <View className={styles.cardHeader}>
                 <View className={styles.cageRow}>

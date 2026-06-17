@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useRouter, useDidShow } from '@tarojs/taro'
 import dayjs from 'dayjs'
@@ -15,14 +15,29 @@ const CageDetailPage: React.FC = () => {
   const router = useRouter()
   const cageId = router.params.id as string
   const { getCageById } = useCageStore()
-  const { bookingList } = useBookingStore()
+  const bookings = useBookingStore(state => state.bookings)
   const [selectedDate, setSelectedDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [startDate, setStartDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [endDate, setEndDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('12:00')
 
-  const cage = useMemo(() => getCageById(cageId), [cageId])
+  useDidShow(() => {
+    // 页面显示时刷新数据
+    const refreshBookings = useBookingStore.getState().refreshBookings
+    if (refreshBookings) {
+      refreshBookings()
+    }
+  })
+
+  const cage = useMemo(() => {
+    try {
+      return getCageById(cageId)
+    } catch (error) {
+      console.error('[CageDetail] 获取笼位信息出错:', error)
+      return null
+    }
+  }, [cageId])
 
   const { hasConflict, conflictMessage, conflictingBookings } = useConflictCheck(
     cageId,
@@ -32,17 +47,25 @@ const CageDetailPage: React.FC = () => {
     endTime
   )
 
-  const cageBookings = useMemo(() => 
-    bookingList.filter(b => b.cageId === cageId && b.status !== 'cancelled'),
-    [bookingList, cageId]
-  )
+  const cageBookings = useMemo(() => {
+    try {
+      return bookings.filter(b => b.cageId === cageId && b.status !== 'cancelled')
+    } catch (error) {
+      console.error('[CageDetail] 获取笼位预约列表出错:', error)
+      return []
+    }
+  }, [bookings, cageId])
 
   const statusText = (status: string): string => {
     const map: Record<string, string> = {
       available: '可预约',
       booked: '已预约',
       maintenance: '维护中',
-      cleaning: '清洁中'
+      cleaning: '清洁中',
+      pending: '待确认',
+      confirmed: '已确认',
+      cancelled: '已取消',
+      completed: '已完成'
     }
     return map[status] || status
   }
@@ -59,45 +82,60 @@ const CageDetailPage: React.FC = () => {
   }
 
   const handleBookNow = () => {
-    if (!cage || cage.status !== 'available') {
-      Taro.showToast({ title: '该笼位当前不可预约', icon: 'none' })
-      return
+    try {
+      if (!cage || cage.status !== 'available') {
+        Taro.showToast({ title: '该笼位当前不可预约', icon: 'none' })
+        return
+      }
+
+      if (hasConflict) {
+        Taro.showToast({ title: '所选时段存在冲突', icon: 'none' })
+        return
+      }
+
+      if (!startDate || !endDate || !startTime || !endTime) {
+        Taro.showToast({ title: '请选择完整的预约时段', icon: 'none' })
+        return
+      }
+
+      if (dayjs(startDate).isAfter(dayjs(endDate))) {
+        Taro.showToast({ title: '结束日期不能早于开始日期', icon: 'none' })
+        return
+      }
+
+      const startMin = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1])
+      const endMin = parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1])
+      if (startMin >= endMin) {
+        Taro.showToast({ title: '结束时间必须晚于开始时间', icon: 'none' })
+        return
+      }
+
+      const params = new URLSearchParams({
+        cageId,
+        cageNo: cage.cageNo,
+        startDate,
+        endDate,
+        startTime,
+        endTime
+      })
+
+      Taro.navigateTo({
+        url: `/pages/booking-confirm/index?${params.toString()}`
+      })
+    } catch (error) {
+      console.error('[CageDetail] 预约操作出错:', error)
+      Taro.showToast({ title: '操作失败，请重试', icon: 'none' })
     }
+  }
 
-    if (hasConflict) {
-      Taro.showToast({ title: '所选时段存在冲突', icon: 'none' })
-      return
+  const handleDateSelect = (date: string) => {
+    try {
+      setSelectedDate(date)
+      setStartDate(date)
+      setEndDate(date)
+    } catch (error) {
+      console.error('[CageDetail] 选择日期出错:', error)
     }
-
-    if (!startDate || !endDate || !startTime || !endTime) {
-      Taro.showToast({ title: '请选择完整的预约时段', icon: 'none' })
-      return
-    }
-
-    if (dayjs(startDate).isAfter(dayjs(endDate))) {
-      Taro.showToast({ title: '结束日期不能早于开始日期', icon: 'none' })
-      return
-    }
-
-    const startMin = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1])
-    const endMin = parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1])
-    if (startMin >= endMin) {
-      Taro.showToast({ title: '结束时间必须晚于开始时间', icon: 'none' })
-      return
-    }
-
-    const params = new URLSearchParams({
-      cageId,
-      cageNo: cage.cageNo,
-      startDate,
-      endDate,
-      startTime,
-      endTime
-    })
-
-    Taro.navigateTo({
-      url: `/pages/booking-confirm/index?${params.toString()}`
-    })
   }
 
   if (!cage) {
@@ -189,7 +227,7 @@ const CageDetailPage: React.FC = () => {
         <CalendarView
           cageId={cageId}
           selectedDate={selectedDate}
-          onDateSelect={setSelectedDate}
+          onDateSelect={handleDateSelect}
         />
       </View>
 

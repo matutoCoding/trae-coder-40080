@@ -242,6 +242,27 @@
   &.danger { color: $color-danger; }
 }
 
+.stockNote {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-normal;
+  margin-left: $spacing-xs;
+}
+
+.stockHint {
+  font-size: $font-size-xs;
+  margin-top: $spacing-xs;
+  display: block;
+
+  &.successHint {
+    color: $color-success;
+  }
+
+  &.warningHint {
+    color: $color-warning;
+  }
+}
+
 .quantityPicker {
   display: flex;
   align-items: center;
@@ -263,6 +284,11 @@
     .quantityBtnText {
       color: $color-text-white;
     }
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
   }
 }
 
@@ -405,6 +431,28 @@
   font-size: $font-size-sm;
   color: $color-success;
   font-weight: $font-weight-medium;
+}
+
+.stockShortageNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  background: rgba(255, 125, 0, 0.1);
+  border: 2rpx solid rgba(255, 125, 0, 0.3);
+  border-radius: $radius-button;
+  padding: $spacing-md;
+  margin-top: $spacing-md;
+}
+
+.noticeIcon {
+  font-size: $font-size-lg;
+  flex-shrink: 0;
+}
+
+.noticeText {
+  font-size: $font-size-sm;
+  color: $color-warning-dark;
+  line-height: 1.5;
 }
 
 .outboundItem {

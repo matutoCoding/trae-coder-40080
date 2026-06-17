@@ -13,13 +13,14 @@ interface BookingState {
   setCurrentResearcher: (researcher: string) => void
   getFilteredBookings: () => Booking[]
   getMyBookings: () => Booking[]
+  getActiveBookingsByCageId: (cageId: string) => Booking[]
   createBooking: (data: BookingFormData) => Booking | null
   cancelBooking: (id: string, reason: string) => boolean
   refreshBookings: () => void
 }
 
 export const useBookingStore = create<BookingState>((set, get) => ({
-  bookings: bookingList,
+  bookings: [...bookingList],
   selectedBooking: null,
   filterStatus: 'all',
   currentResearcher: '',
@@ -40,9 +41,20 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   },
   
   getMyBookings: () => {
-    const { currentResearcher } = get()
-    return getMyBookings(currentResearcher || undefined)
-      .sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime())
+    const { currentResearcher, bookings } = get()
+    let filtered = bookings
+    if (currentResearcher) {
+      filtered = bookings.filter(b => b.researcher === currentResearcher)
+    }
+    return filtered.sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime())
+  },
+
+  getActiveBookingsByCageId: (cageId: string) => {
+    const { bookings } = get()
+    return bookings.filter(
+      booking => booking.cageId === cageId && 
+      (booking.status === 'confirmed' || booking.status === 'pending')
+    )
   },
   
   createBooking: (data) => {
@@ -58,7 +70,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     })
     
     if (newBooking) {
-      set({ bookings: [...bookingList] })
+      set(state => ({ bookings: [...state.bookings, newBooking] }))
     }
     
     return newBooking
@@ -67,7 +79,13 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   cancelBooking: (id, reason) => {
     const success = dataCancelBooking(id, reason)
     if (success) {
-      set({ bookings: [...bookingList] })
+      set(state => ({
+        bookings: state.bookings.map(b => 
+          b.id === id 
+            ? { ...b, status: 'cancelled' as BookingStatus, cancelReason: reason, cancelTime: new Date().toISOString(), updateTime: new Date().toISOString() }
+            : b
+        )
+      }))
     }
     return success
   },

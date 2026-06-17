@@ -18,7 +18,7 @@ const OutboundConfirmPage: React.FC = () => {
   const outboundIdParam = router.params.id as string
 
   const { createOutbound, getOutboundById } = useOutboundStore()
-  const { reagents, checkExpiredBatches } = useReagentStore()
+  const { reagents, checkExpiredBatches, getAvailableStock } = useReagentStore()
 
   const [selectedReagentId, setSelectedReagentId] = useState(reagentIdParam || '')
   const [quantity, setQuantity] = useState(1)
@@ -58,6 +58,16 @@ const OutboundConfirmPage: React.FC = () => {
     [reagents, selectedReagentId]
   )
 
+  const availableStock = useMemo(() => {
+    if (!selectedReagentId) return 0
+    try {
+      return getAvailableStock(selectedReagentId)
+    } catch (error) {
+      console.error('[OutboundConfirm] 获取可用库存出错:', error)
+      return 0
+    }
+  }, [selectedReagentId, getAvailableStock])
+
   const updateFormField = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors[field]) {
@@ -75,12 +85,12 @@ const OutboundConfirmPage: React.FC = () => {
     const quantityError = validateQuantity(quantity, '出库数量')
     if (quantityError) newErrors.quantity = quantityError
 
-    if (selectedReagent && quantity > selectedReagent.availableStock) {
-      newErrors.quantity = `出库数量不能超过库存(${selectedReagent.availableStock}${selectedReagent.unit})`
+    if (quantity > availableStock) {
+      newErrors.quantity = `出库数量不能超过可出库库存(${availableStock}${selectedReagent?.unit || ''})`
     }
 
     if (!recommendation?.isSufficient) {
-      newErrors.quantity = '库存不足，无法满足出库需求'
+      newErrors.quantity = '可出库库存不足，无法满足出库需求'
     }
 
     const researchGroupError = validateRequired(formData.researchGroup, '领用课题组')
@@ -157,6 +167,15 @@ const OutboundConfirmPage: React.FC = () => {
   const isViewMode = !!outboundIdParam
   const viewOutbound = outboundIdParam ? getOutboundById(outboundIdParam) : null
 
+  const getStockStatusText = (): string => {
+    if (!selectedReagentId) return ''
+    if (availableStock === 0) return '暂无可用库存'
+    if (recommendation?.isSufficient) {
+      return `库存充足，可满足 ${quantity} ${selectedReagent?.unit || ''} 需求`
+    }
+    return `库存不足，仅可出库 ${availableStock} ${selectedReagent?.unit || ''}`
+  }
+
   return (
     <ScrollView className={styles.pageContainer} scrollY>
       {isViewMode && viewOutbound ? (
@@ -220,7 +239,7 @@ const OutboundConfirmPage: React.FC = () => {
             <Text className={styles.bannerIcon}>📋</Text>
             <View className={styles.bannerContent}>
               <Text className={styles.bannerTitle}>先进先出 (FIFO)</Text>
-              <Text className={styles.bannerDesc}>系统自动按效期先后推荐出库批次</Text>
+              <Text className={styles.bannerDesc}>系统自动按效期先后推荐出库批次，确保先到期先出库</Text>
             </View>
           </View>
 
@@ -237,6 +256,7 @@ const OutboundConfirmPage: React.FC = () => {
                 onChange={(e) => {
                   const idx = parseInt(e.detail.value)
                   setSelectedReagentId(reagents[idx]?.id || '')
+                  setQuantity(1)
                 }}
               >
                 <View className={classnames(styles.formPicker, errors.reagent && styles.inputError)}>
@@ -258,12 +278,17 @@ const OutboundConfirmPage: React.FC = () => {
                   <Text className={styles.reagentInfoValue}>{selectedReagent.specification}</Text>
                 </View>
                 <View className={styles.reagentInfoRow}>
-                  <Text className={styles.reagentInfoLabel}>可用库存</Text>
+                  <Text className={styles.reagentInfoLabel}>可出库库存</Text>
                   <Text className={classnames(
                     styles.reagentInfoValue,
-                    selectedReagent.availableStock < 10 && styles.danger
+                    availableStock < 10 && styles.danger
                   )}>
-                    {selectedReagent.availableStock} {selectedReagent.unit}
+                    {availableStock} {selectedReagent.unit}
+                    {selectedReagent.totalStock > availableStock && (
+                      <Text className={styles.stockNote}>
+                        （总库存{selectedReagent.totalStock}，含锁定/过期）
+                      </Text>
+                    )}
                   </Text>
                 </View>
                 <View className={styles.reagentInfoRow}>
@@ -288,10 +313,10 @@ const OutboundConfirmPage: React.FC = () => {
                   className={classnames(styles.quantityInput, errors.quantity && styles.inputError)}
                   type="number"
                   value={String(quantity)}
-                  onInput={(e) => setQuantity(parseInt(e.detail.value) || 0)}
+                  onInput={(e) => setQuantity(Math.max(1, parseInt(e.detail.value) || 0))}
                 />
                 <View
-                  className={styles.quantityBtn}
+                  className={classnames(styles.quantityBtn, quantity >= availableStock && styles.disabled)}
                   onClick={() => setQuantity(quantity + 1)}
                 >
                   <Text className={styles.quantityBtnText}>+</Text>
@@ -300,9 +325,16 @@ const OutboundConfirmPage: React.FC = () => {
                   {selectedReagent?.unit || '份'}
                 </Text>
               </View>
-              {errors.quantity && (
+              {errors.quantity ? (
                 <Text className={styles.errorText}>{errors.quantity}</Text>
-              )}
+              ) : selectedReagentId ? (
+                <Text className={classnames(
+                  styles.stockHint,
+                  recommendation?.isSufficient ? styles.successHint : styles.warningHint
+                )}>
+                  {getStockStatusText()}
+                </Text>
+              ) : null}
             </View>
           </View>
 
@@ -310,22 +342,24 @@ const OutboundConfirmPage: React.FC = () => {
             <View className={styles.sectionCard}>
               <View className={styles.sectionHeader}>
                 <Text className={styles.cardTitle}>FIFO 出库推荐</Text>
-                {!recommendation.isSufficient && (
-                  <StatusTag type="expired" text="库存不足" size="sm" />
-                )}
+                <StatusTag 
+                  type={recommendation.isSufficient ? 'available' : 'expiring'} 
+                  text={recommendation.isSufficient ? '可满足' : '库存不足'} 
+                  size="sm" 
+                />
               </View>
 
               <View className={styles.recommendationSummary}>
                 <Text className={styles.summaryText}>
                   需求 <Text className={styles.highlight}>{recommendation.requestedQuantity}</Text> {selectedReagent?.unit}，
-                  可用 <Text className={classnames(recommendation.isSufficient ? styles.success : styles.danger)}>
+                  可出库 <Text className={classnames(recommendation.isSufficient ? styles.success : styles.danger)}>
                     {recommendation.availableQuantity}
                   </Text> {selectedReagent?.unit}
                 </Text>
               </View>
 
               <View className={styles.batchAllocation}>
-                <Text className={styles.allocationTitle}>批次分配方案</Text>
+                <Text className={styles.allocationTitle}>批次分配方案（按效期由近到远）</Text>
                 {recommendation.batches.map((batch, index) => (
                   <View key={batch.batchId} className={styles.allocationItem}>
                     <View className={styles.allocationIndex}>{index + 1}</View>
@@ -353,7 +387,16 @@ const OutboundConfirmPage: React.FC = () => {
                 <View className={styles.fifoCompliance}>
                   <Text className={styles.complianceIcon}>✓</Text>
                   <Text className={styles.complianceText}>
-                    符合先进先出原则，将按效期由近到远依次出库
+                    符合先进先出原则，将优先使用最早到期的批次
+                  </Text>
+                </View>
+              )}
+
+              {!recommendation.isSufficient && (
+                <View className={styles.stockShortageNotice}>
+                  <Text className={styles.noticeIcon}>⚠️</Text>
+                  <Text className={styles.noticeText}>
+                    当前可出库库存不足，建议减少出库数量或补充库存
                   </Text>
                 </View>
               )}

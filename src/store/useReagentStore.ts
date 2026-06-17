@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { Reagent, ReagentBatch, ReagentCategory, BatchInboundForm } from '@/types/reagent'
-import { reagentList, batchList, getReagentById, getBatchesByReagentId, addBatch, checkAndLockExpiredBatches } from '@/data/reagentData'
+import { reagentList, batchList, getReagentById, getBatchesByReagentId, addBatch, checkAndLockExpiredBatches, getAvailableBatchesByReagentId } from '@/data/reagentData'
 
 interface ReagentState {
   reagents: Reagent[]
@@ -18,6 +18,8 @@ interface ReagentState {
   getFilteredReagents: () => Reagent[]
   getReagentById: (id: string) => Reagent | undefined
   getBatchesByReagentId: (reagentId: string) => ReagentBatch[]
+  getAvailableBatchesByReagentId: (reagentId: string) => ReagentBatch[]
+  getAvailableStock: (reagentId: string) => number
   addBatch: (form: BatchInboundForm) => ReagentBatch | null
   checkExpiredBatches: () => number
   refreshReagents: () => void
@@ -25,8 +27,8 @@ interface ReagentState {
 }
 
 export const useReagentStore = create<ReagentState>((set, get) => ({
-  reagents: reagentList,
-  batches: batchList,
+  reagents: [...reagentList],
+  batches: [...batchList],
   selectedReagent: null,
   selectedBatch: null,
   filterCategory: 'all',
@@ -65,9 +67,29 @@ export const useReagentStore = create<ReagentState>((set, get) => ({
     })
   },
   
-  getReagentById: (id) => getReagentById(id),
+  getReagentById: (id) => {
+    const { reagents } = get()
+    return reagents.find(r => r.id === id)
+  },
   
-  getBatchesByReagentId: (reagentId) => getBatchesByReagentId(reagentId),
+  getBatchesByReagentId: (reagentId) => {
+    const { batches } = get()
+    return batches.filter(b => b.reagentId === reagentId)
+  },
+  
+  getAvailableBatchesByReagentId: (reagentId) => {
+    const { batches } = get()
+    return batches.filter(
+      batch => batch.reagentId === reagentId && 
+      batch.status === 'normal' && 
+      batch.availableQuantity > 0
+    ).sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+  },
+  
+  getAvailableStock: (reagentId) => {
+    const availableBatches = get().getAvailableBatchesByReagentId(reagentId)
+    return availableBatches.reduce((sum, batch) => sum + batch.availableQuantity, 0)
+  },
   
   addBatch: (form) => {
     const reagent = getReagentById(form.reagentId)
@@ -84,10 +106,10 @@ export const useReagentStore = create<ReagentState>((set, get) => ({
     })
     
     if (newBatch) {
-      set({ 
-        reagents: [...reagentList],
-        batches: [...batchList]
-      })
+      set(state => ({ 
+        reagents: state.reagents.map(r => r.id === form.reagentId ? { ...reagent } : r),
+        batches: [...state.batches, newBatch]
+      }))
     }
     
     return newBatch

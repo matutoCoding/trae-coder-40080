@@ -3,7 +3,8 @@ import { View, Text, Picker, ScrollView } from '@tarojs/components'
 import classnames from 'classnames'
 import dayjs from 'dayjs'
 import { generateTimeSlots, generateDateRange } from '@/utils/dateUtils'
-import { useCageAvailability } from '@/hooks/useConflictCheck'
+import { useBookingStore } from '@/store/useBookingStore'
+import type { Booking } from '@/types/booking'
 import styles from './index.module.scss'
 
 interface TimeSlotPickerProps {
@@ -30,27 +31,68 @@ const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
   onEndTimeChange
 }) => {
   const [activeTab, setActiveTab] = useState<'date' | 'time'>('date')
+  const bookings = useBookingStore(state => state.bookings)
   
   const timeSlots = useMemo(() => generateTimeSlots(''), [])
   const dateRange = useMemo(() => {
-    if (startDate && endDate) {
-      return generateDateRange(startDate, endDate)
+    try {
+      if (startDate && endDate) {
+        return generateDateRange(startDate, endDate)
+      }
+      return []
+    } catch (error) {
+      console.error('[TimeSlotPicker] 生成日期范围出错:', error)
+      return []
     }
-    return []
   }, [startDate, endDate])
 
   const minDate = dayjs().format('YYYY-MM-DD')
   const maxDate = dayjs().add(1, 'year').format('YYYY-MM-DD')
 
-  const { bookedSlots } = useCageAvailability(cageId, startDate)
+  const bookedSlots = useMemo(() => {
+    try {
+      const dayBookings = bookings.filter(
+        b => b.cageId === cageId && 
+        (b.status === 'confirmed' || b.status === 'pending') &&
+        startDate >= b.startDate && startDate <= b.endDate
+      )
+
+      const slots: { startTime: string; endTime: string; booking: Booking }[] = []
+      for (const booking of dayBookings) {
+        slots.push({
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          booking
+        })
+      }
+      return slots
+    } catch (error) {
+      console.error('[TimeSlotPicker] 获取已预约时段出错:', error)
+      return []
+    }
+  }, [cageId, startDate, bookings])
 
   const isTimeBooked = (time: string): boolean => {
-    return bookedSlots.some(slot => {
-      const slotStart = parseInt(slot.startTime.split(':')[0]) * 60 + parseInt(slot.startTime.split(':')[1])
-      const slotEnd = parseInt(slot.endTime.split(':')[0]) * 60 + parseInt(slot.endTime.split(':')[1])
-      const timeMin = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1])
-      return timeMin >= slotStart && timeMin < slotEnd
-    })
+    try {
+      return bookedSlots.some(slot => {
+        const slotStart = parseInt(slot.startTime.split(':')[0]) * 60 + parseInt(slot.startTime.split(':')[1])
+        const slotEnd = parseInt(slot.endTime.split(':')[0]) * 60 + parseInt(slot.endTime.split(':')[1])
+        const timeMin = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1])
+        return timeMin >= slotStart && timeMin < slotEnd
+      })
+    } catch (error) {
+      console.error('[TimeSlotPicker] 检查时段是否已约出错:', error)
+      return false
+    }
+  }
+
+  const handleTimeSelect = (time: string, isBooked: boolean) => {
+    if (isBooked) return
+    try {
+      onStartTimeChange(time)
+    } catch (error) {
+      console.error('[TimeSlotPicker] 选择时段出错:', error)
+    }
   }
 
   return (
@@ -175,7 +217,7 @@ const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
                     isBooked && styles.booked,
                     isSelected && styles.selected
                   )}
-                  onClick={() => !isBooked && onStartTimeChange(slot.startTime)}
+                  onClick={() => handleTimeSelect(slot.startTime, isBooked)}
                 >
                   <Text className={styles.slotTime}>{slot.startTime}</Text>
                   <Text className={styles.slotRange}>-{slot.endTime}</Text>
