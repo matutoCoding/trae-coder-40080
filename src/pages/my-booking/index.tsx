@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
+import React, { useState, useMemo, Fragment } from 'react'
+import { View, Text, ScrollView, Textarea } from '@tarojs/components'
 import Taro, { usePullDownRefresh } from '@tarojs/taro'
 import dayjs from 'dayjs'
 import classnames from 'classnames'
@@ -121,7 +121,8 @@ const MyBookingPage: React.FC = () => {
   }, [filteredBookings])
 
   return (
-    <ScrollView className={styles.pageContainer} scrollY>
+    <Fragment>
+      <ScrollView className={styles.pageContainer} scrollY>
       <View className={styles.statsRow}>
         <View className={styles.statItem}>
           <Text className={styles.statValue}>{stats.all}</Text>
@@ -258,6 +259,8 @@ const MyBookingPage: React.FC = () => {
         )}
       </View>
 
+    </ScrollView>
+
       {showCancelModal && (
         <View className={styles.modalOverlay} onClick={() => setShowCancelModal(false)}>
           <View className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -274,6 +277,7 @@ const MyBookingPage: React.FC = () => {
                 value={cancelReason}
                 onInput={(e) => setCancelReason(e.detail.value)}
                 maxlength={200}
+                autoFocus
               />
             </View>
 
@@ -294,7 +298,7 @@ const MyBookingPage: React.FC = () => {
           </View>
         </View>
       )}
-    </ScrollView>
+    </Fragment>
   )
 }
 

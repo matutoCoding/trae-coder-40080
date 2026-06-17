@@ -56,7 +56,7 @@ const BookingConfirmPage: React.FC = () => {
     }
   }
 
-  const validateForm = (): boolean => {
+  const validateForm = (): { valid: boolean; errors: Record<string, string> } => {
     const newErrors: Record<string, string> = {}
 
     const researchGroupError = validateRequired(formData.researchGroup, '课题组名称')
@@ -82,7 +82,10 @@ const BookingConfirmPage: React.FC = () => {
     if (purposeError) newErrors.purpose = purposeError
 
     setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    return {
+      valid: Object.keys(newErrors).length === 0,
+      errors: newErrors
+    }
   }
 
   const handleSubmit = async () => {
@@ -91,9 +94,10 @@ const BookingConfirmPage: React.FC = () => {
       return
     }
 
-    if (!validateForm()) {
-      const firstError = Object.values(errors)[0]
-      Taro.showToast({ title: firstError, icon: 'none' })
+    const { valid, errors: validationErrors } = validateForm()
+    if (!valid) {
+      const firstError = Object.values(validationErrors)[0]
+      Taro.showToast({ title: firstError || '请完善表单信息', icon: 'none' })
       return
     }
 
