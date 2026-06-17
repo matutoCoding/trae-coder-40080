@@ -1,0 +1,63 @@
+// ============================================
+// 主题配色变量（实验动物房预约系统）
+// ============================================
+
+// 品牌主题色：科技蓝，体现科研专业性
+$color-primary: #165dff;
+$color-primary-light: #4080ff;
+$color-primary-dark: #0e42d2;
+
+// 辅助色：青色，医疗/科研相关
+$color-secondary: #0fc6c2;
+$color-secondary-light: #40d4d0;
+
+// 功能色
+$color-success: #00b42a;
+$color-warning: #ff7d00;
+$color-warning-dark: #d46a00;
+$color-danger: #f53f3f;
+$color-error: #f53f3f;
+$color-info: #165dff;
+
+// 业务状态色
+$color-available: #00b42a;
+$color-booked: #165dff;
+$color-expiring: #ff7d00;
+$color-expired: #f53f3f;
+$color-locked: #86909c;
+
+// 笼位相关
+$color-cage-available: #00b42a;
+$color-cage-booked: #165dff;
+
+// 试剂相关
+$color-reagent-normal: #00b42a;
+$color-reagent-expiring: #ff7d00;
+$color-reagent-expired: #f53f3f;
+
+// 强调色
+$color-accent-blue: #4080ff;
+$color-accent-green: #00b42a;
+$color-accent-yellow: #ffd53d;
+$color-accent-red: #f53f3f;
+
+// 标签背景色
+$color-tag-available: rgba(0, 180, 42, 0.1);
+$color-tag-booked: rgba(22, 93, 255, 0.1);
+$color-tag-expiring: rgba(255, 125, 0, 0.1);
+$color-tag-expired: rgba(245, 63, 63, 0.1);
+$color-tag-locked: rgba(134, 144, 156, 0.1);
+
+// 背景色
+$color-bg-page: #f5f6f7;
+$color-bg-card: #ffffff;
+$color-bg-hover: #f2f3f5;
+$color-bg-gradient: linear-gradient(180deg, #e8f0ff 0%, #f5f6f7 100%);
+
+// 文本色
+$color-text-primary: #1d2129;
+$color-text-secondary: #4e5969;
+$color-text-tertiary: #86909c;
+$color-text-quaternary: #c9cdd4;
+$color-text-disabled: #c9cdd4;
+$color-text-white: #ffffff;

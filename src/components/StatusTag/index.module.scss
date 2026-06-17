@@ -1,0 +1,107 @@
+@use '@/styles/variables.scss' as *;
+
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  padding: 4rpx 12rpx;
+
+  &.sm {
+    padding: 2rpx 8rpx;
+    .tagText {
+      font-size: $font-size-xs;
+    }
+  }
+
+  &.md {
+    .tagText {
+      font-size: $font-size-sm;
+    }
+  }
+
+  .tagText {
+    font-weight: $font-weight-medium;
+    line-height: 1.2;
+  }
+}
+
+.available {
+  background: $color-tag-available;
+  .tagText { color: $color-available; }
+}
+
+.booked {
+  background: $color-tag-booked;
+  .tagText { color: $color-booked; }
+}
+
+.maintenance {
+  background: $color-tag-locked;
+  .tagText { color: $color-locked; }
+}
+
+.cleaning {
+  background: $color-tag-locked;
+  .tagText { color: $color-locked; }
+}
+
+.pending {
+  background: rgba(22, 93, 255, 0.1);
+  .tagText { color: $color-primary; }
+}
+
+.confirmed {
+  background: $color-tag-available;
+  .tagText { color: $color-success; }
+}
+
+.cancelled {
+  background: $color-tag-locked;
+  .tagText { color: $color-locked; }
+}
+
+.completed {
+  background: $color-tag-available;
+  .tagText { color: $color-success; }
+}
+
+.rejected {
+  background: $color-tag-expired;
+  .tagText { color: $color-error; }
+}
+
+.normal {
+  background: $color-tag-available;
+  .tagText { color: $color-available; }
+}
+
+.expiring_7 {
+  background: $color-tag-expiring;
+  .tagText { color: $color-expiring; }
+}
+
+.expiring_15 {
+  background: $color-tag-expiring;
+  .tagText { color: $color-expiring; }
+}
+
+.expiring_30 {
+  background: $color-tag-expiring;
+  .tagText { color: $color-expiring; }
+}
+
+.expired {
+  background: $color-tag-expired;
+  .tagText { color: $color-expired; }
+}
+
+.locked {
+  background: $color-tag-locked;
+  .tagText { color: $color-locked; }
+}
+
+.depleted {
+  background: $color-tag-locked;
+  .tagText { color: $color-locked; }
+}

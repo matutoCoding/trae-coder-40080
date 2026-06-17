@@ -1,0 +1,220 @@
+@use '@/styles/variables.scss' as *;
+
+.pickerContainer {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.tab {
+  flex: 1;
+  padding: $spacing-md 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &.active {
+    border-bottom: 4rpx solid $color-primary;
+    .tabText {
+      color: $color-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+.tabText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.dateSection,
+.timeSection {
+  padding: $spacing-lg;
+}
+
+.dateRow {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.dateItem {
+  flex: 1;
+}
+
+.dateLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.datePicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.dateValue {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.pickerIcon {
+  font-size: $font-size-xl;
+  color: $color-text-tertiary;
+}
+
+.dateSummary {
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.summaryText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.highlight {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-lg;
+}
+
+.datePreview {
+  display: flex;
+  gap: $spacing-sm;
+  @include scroll-x-container;
+}
+
+.dateChip {
+  @include scroll-x-item(100rpx);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-sm;
+  background: $color-bg-card;
+  border-radius: $radius-sm;
+  margin-right: $spacing-sm;
+}
+
+.chipWeekday {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.chipDate {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.chipMore {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-medium;
+}
+
+.sectionTitle {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.slotGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.slotItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+  position: relative;
+
+  &:active:not(.booked) {
+    transform: scale(0.95);
+  }
+
+  &.selected {
+    background: rgba(22, 93, 255, 0.1);
+    border-color: $color-primary;
+    .slotTime, .slotRange {
+      color: $color-primary;
+    }
+  }
+
+  &.booked {
+    opacity: 0.5;
+    background: $color-bg-hover;
+    pointer-events: none;
+  }
+}
+
+.slotTime {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.slotRange {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.bookedTag {
+  position: absolute;
+  top: 4rpx;
+  right: 4rpx;
+  font-size: 18rpx;
+  color: $color-error;
+  background: rgba(245, 63, 63, 0.1);
+  padding: 2rpx 8rpx;
+  border-radius: $radius-xs;
+}
+
+.bookedNotice {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  background: rgba(255, 125, 0, 0.1);
+  padding: $spacing-md;
+  border-radius: $radius-md;
+}
+
+.noticeIcon {
+  font-size: $font-size-lg;
+  color: $color-warning;
+}
+
+.noticeText {
+  font-size: $font-size-sm;
+  color: $color-warning;
+}

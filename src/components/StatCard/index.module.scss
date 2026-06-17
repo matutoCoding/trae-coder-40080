@@ -1,0 +1,87 @@
+@use '@/styles/variables.scss' as *;
+
+.statCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  position: relative;
+  overflow: hidden;
+  transition: all $transition-base;
+
+  &.clickable {
+    &:active {
+      transform: scale(0.98);
+      box-shadow: $shadow-card-hover;
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6rpx;
+    border-radius: $radius-lg $radius-lg 0 0;
+  }
+
+  &.primary::before { background: $color-primary; }
+  &.success::before { background: $color-success; }
+  &.warning::before { background: $color-warning; }
+  &.error::before { background: $color-error; }
+  &.info::before { background: $color-secondary; }
+}
+
+.title {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.value {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: 1.2;
+}
+
+.unit {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  margin-top: $spacing-sm;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+
+  &.up {
+    background: rgba(0, 180, 42, 0.1);
+    .trendIcon, .trendText { color: $color-success; }
+  }
+
+  &.down {
+    background: rgba(245, 63, 63, 0.1);
+    .trendIcon, .trendText { color: $color-error; }
+  }
+}
+
+.trendIcon {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+}
+
+.trendText {
+  font-size: $font-size-xs;
+}

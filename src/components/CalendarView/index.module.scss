@@ -1,0 +1,172 @@
+@use '@/styles/variables.scss' as *;
+
+.calendarContainer {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.navBtn {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-round;
+  background: $color-bg-page;
+  transition: all $transition-base;
+
+  &:active {
+    background: $color-bg-hover;
+    transform: scale(0.9);
+  }
+}
+
+.navIcon {
+  font-size: $font-size-xl;
+  color: $color-text-primary;
+  font-weight: $font-weight-bold;
+}
+
+.monthTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.weekdayRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: $spacing-sm;
+}
+
+.weekdayCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm 0;
+}
+
+.weekdayText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+
+  &.weekend {
+    color: $color-error;
+  }
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8rpx;
+}
+
+.dayCell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+  position: relative;
+
+  &:active:not(.past):not(.otherMonth) {
+    transform: scale(0.9);
+  }
+
+  &.otherMonth {
+    .dayText {
+      color: $color-text-disabled;
+    }
+  }
+
+  &.today {
+    background: rgba(22, 93, 255, 0.1);
+    .dayText {
+      color: $color-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &.selected {
+    background: $color-primary;
+    .dayText {
+      color: $color-text-white;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &.past {
+    pointer-events: none;
+    .dayText {
+      color: $color-text-disabled;
+    }
+  }
+
+  &.hasBooking:not(.selected) {
+    background: rgba(245, 63, 63, 0.05);
+  }
+}
+
+.dayText {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+}
+
+.bookingDot {
+  position: absolute;
+  bottom: 8rpx;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: $color-error;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-xl;
+  margin-top: $spacing-lg;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.legendDot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+
+  &.available {
+    background: $color-success;
+  }
+
+  &.booked {
+    background: $color-error;
+  }
+
+  &.todayDot {
+    background: $color-primary;
+  }
+}
+
+.legendText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}

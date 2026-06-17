@@ -1,0 +1,137 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  padding-bottom: calc(#{$spacing-xl * 2} + env(safe-area-inset-bottom));
+}
+
+.searchSection {
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  margin: 0 (-$page-padding) $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  background: $color-bg-page;
+  border-radius: $radius-button;
+  padding: 0 $spacing-md;
+  height: 72rpx;
+  margin-bottom: $spacing-md;
+}
+
+.searchIcon {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+  margin-right: $spacing-sm;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.filterRow {
+  display: flex;
+  gap: $spacing-sm;
+  @include scroll-x-container;
+}
+
+.filterChip {
+  @include scroll-x-item(auto);
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-button;
+  margin-right: $spacing-sm;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.active {
+    background: rgba(22, 93, 255, 0.1);
+    border-color: $color-primary;
+    .filterText {
+      color: $color-primary;
+      font-weight: $font-weight-medium;
+    }
+  }
+}
+
+.filterText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.statusFilter {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.statusBtn {
+  padding: 8rpx 16rpx;
+  border-radius: $radius-button;
+  background: $color-bg-page;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-primary;
+    .statusBtnText {
+      color: $color-text-white;
+    }
+  }
+}
+
+.statusBtnText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.cageList {
+  padding-bottom: $spacing-xl;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2 0;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-md;
+  opacity: 0.3;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.loading {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $color-text-tertiary;
+}

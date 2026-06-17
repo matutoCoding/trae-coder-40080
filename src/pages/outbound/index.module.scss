@@ -1,0 +1,435 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  padding-bottom: calc(#{$spacing-xl * 2} + env(safe-area-inset-bottom));
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.alertSection {
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: $radius-card;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.alertTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-warning-dark;
+  margin-bottom: $spacing-sm;
+}
+
+.alertList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.alertItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alertItemName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.alertItemStock {
+  font-size: $font-size-sm;
+  color: $color-warning-dark;
+  font-weight: $font-weight-medium;
+}
+
+.tabBar {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  padding: $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.tabItem {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 72rpx;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-primary;
+    .tabText {
+      color: $color-text-white;
+      font-weight: $font-weight-medium;
+    }
+  }
+}
+
+.tabText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.recordCard {
+  background: $color-bg-card;
+  border-radius: $radius-card;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.recordHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1rpx solid $color-border;
+}
+
+.recordNoRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.recordNo {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.recordTime {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.recordInfo {
+  margin-bottom: $spacing-md;
+}
+
+.infoRow {
+  display: flex;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.infoLabel {
+  width: 160rpx;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.infoValue {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.recordItems {
+  background: $color-bg-page;
+  border-radius: $radius-card;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.itemName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  flex: 1;
+}
+
+.itemBatch {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.itemBatchNo {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.itemQty {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.moreItems {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-sm;
+}
+
+.recordFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerInfo {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.operator {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2 0;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-md;
+  opacity: 0.3;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.fifoSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.fifoCard {
+  background: $color-bg-card;
+  border-radius: $radius-card;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.fifoHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.fifoIcon {
+  font-size: 48rpx;
+}
+
+.fifoTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.fifoContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.fifoDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.fifoRuleList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.ruleItem {
+  display: flex;
+  gap: $spacing-md;
+  align-items: flex-start;
+}
+
+.ruleNumber {
+  width: 48rpx;
+  height: 48rpx;
+  background: $color-primary;
+  color: $color-text-white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  flex-shrink: 0;
+}
+
+.ruleContent {
+  flex: 1;
+}
+
+.ruleTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.ruleDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.fifoExample {
+  background: $color-bg-page;
+  border-radius: $radius-card;
+  padding: $spacing-md;
+}
+
+.exampleTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.exampleContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.exampleText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.reagentListSection {
+  background: $color-bg-card;
+  border-radius: $radius-card;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.reagentRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.reagentInfo {
+  flex: 1;
+}
+
+.reagentName {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.reagentSpec {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.reagentStock {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-xs;
+}
+
+.stockValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.stockUnit {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.bottomActionBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  height: 88rpx;
+  background: $color-primary;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.actionIcon {
+  font-size: $font-size-xl;
+}
+
+.actionText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  color: $color-text-white;
+}
